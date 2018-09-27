@@ -2,6 +2,7 @@ import boto3
 import json
 import os
 import datetime
+import requests
 
 
 print('Loading function')
@@ -47,3 +48,25 @@ def lambda_handler(event, context):
           )
    
     return respond(None, os.environ['BlackListProcess'])
+
+def Screenshot(event,context):
+    apiKey = apigateway.get_api_key(apiKey=event["requestContext"]["identity"]["apiKeyId"],includeValue=True)
+
+    fields = {"acl": "public-read"}
+
+    conditions = [
+        {"acl": "public-read"},
+        ["content-length-range", 30, 1000]
+    ]
+
+    post = s3.generate_presigned_post(
+        Bucket=os.environ['StudentLabDataBucket'],
+        Key="process_by_id/"+ apiKey["name"],
+        Fields=fields,
+        Conditions=conditions
+
+    )
+
+    files = {"file": "file_content"}
+    response = requests.post(post["url"], data=post["fields"], files=files)
+    return response
