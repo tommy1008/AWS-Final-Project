@@ -2,8 +2,8 @@
 
 ## Cloud 9 Setup ##
 
-git clone https://github.com/wongcyrus/labmonitor_collector.git  
-cd labmonitor_collector/  
+git clone https://github.com/HIN0815/FYP_collector.git  
+cd FYP_collector/  
 chmod +x *.sh  
 ./setup.sh  
 
