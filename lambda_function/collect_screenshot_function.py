@@ -18,35 +18,31 @@ def respond(err, res=None):
         },
     }
 
-def lambda_handler(event,context):
+def lambda_handler(event, context):
     apiKey = apigateway.get_api_key(apiKey=event["requestContext"]["identity"]["apiKeyId"],includeValue=True)
-    
+
     now = datetime.datetime.now()
     partition = now.strftime("year=%Y/month=%m/day=%d/hour=%H")
-
-    presigned_url = s3.generate_presigned_url(
-        ClientMethod='put_object',
-        Params={
-            'Bucket': os.environ['StudentLabDataBucket'],
-            'Key': f"screenshot_stream/{partition}/id={apiKey['name']}"
-        }
-    )
+    filename = now.strftime("Screenshot_%M_%S.jpg")
     
-    return respond(None, presigned_url)
+    Bucket= os.environ['StudentLabDataBucket']
+    Key=f"screenshot_stream/{partition}/id={apiKey['name']}/{filename}"
+    fields = {"acl": "public-read"}
 
-#def lambda_handler(event,context):
-#    apiKey = apigateway.get_api_key(apiKey=event["requestContext"]["identity"]["apiKeyId"],includeValue=True)
-   
-#    now = datetime.datetime.now()
-#    partition = now.strftime("year=%Y/month=%m/day=%d/hour=%H")
-#    filename = now.strftime("screenshot_%M_%S.jpg")
-     
-#    img = join(body).decode('utf8')
-     
-#    s3.put_object(Bucket=os.environ['StudentLabDataBucket'],
-#            Key = f"screenshot_stream/{partition}/id={apiKey['name']}/{filename}",
-#            Body = open(img, 'wb'),
-#            ContentType="application/json"
-#          )
 
-#    return respond(None, apiKey["name"] + f" srceenshot events.")
+    conditions = [
+        {"acl": "public-read"}
+        
+        ]
+
+
+    post = s3.generate_presigned_post(
+        Bucket=Bucket,
+        Key=Key,
+        Fields=fields,
+        Conditions=conditions
+        )
+
+    # Return the presigned URL
+    return respond(None, post)
+    
