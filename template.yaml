@@ -225,17 +225,16 @@ Resources:
                     Action:
                       - s3:PutObject
                     Resource:
+                        - Fn::Sub: 'arn:aws:s3:::${StudentLabDataBucket}/*'
                         - Fn::Sub: 'arn:aws:s3:::${StudentMarkingBucket}/*'     
                   - Effect: Allow
                     Action:
                       - s3:PutObjectAcl
                     Resource:
-                        - Fn::Sub: 'arn:aws:s3:::${StudentMarkingBucket}/*' 
-                  - Effect: Allow
+                        - Fn::Sub: 'arn:aws:s3:::${StudentMarkingBucket}/*'  
                     Action:
                       - s3:*
-                    Resource:
-                        - Fn::Sub: 'arn:aws:s3:::${StudentLabDataBucket}/*'
+                    Resource: '*'
             Events:
                 LambdaMicroservice:
                   Type: Api
@@ -281,6 +280,13 @@ Resources:
         Properties:
           VersioningConfiguration:
             Status: Enabled
+          CorsConfiguration:
+            CorsRules:
+              - AllowedMethods:
+                  - POST
+                  - PUT
+                AllowedOrigins:
+                  - "*"
 
     StudentMarkingBucket:
         Type: AWS::S3::Bucket
