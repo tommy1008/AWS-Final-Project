@@ -174,7 +174,7 @@ Resources:
       SubnetId:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
-       NetworkAclId: !Ref PublicNetworkAcl
+      NetworkAclId: !Ref PublicNetworkAcl
           
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
@@ -253,7 +253,7 @@ Resources:
       SubnetId: 
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
-       NetworkAclId: !Ref PublicNetworkAcl
+      NetworkAclId: !Ref PublicNetworkAcl
         
    
        
