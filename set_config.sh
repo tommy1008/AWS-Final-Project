@@ -1,2 +1,2 @@
 export STACK_NAME=lab
-export REGION=us-east-1
+export REGION=us-west-1
