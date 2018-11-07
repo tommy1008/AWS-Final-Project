@@ -318,7 +318,8 @@ Resources:
     Properties:
       AvailabilityZones:
 	    Fn::GetAtt:
-		  - PrivateSubnet
+		  - PrivateSubnet1
+		  - PrivateSubnet2
 		  - AvailabilityZone
       VPCZoneIdentifier: 
 	    - !Ref PrivateSubnet1
@@ -332,7 +333,34 @@ Resources:
 	    Key: Network
 		Value: Public
 		PropagateAtLaunch: true		
-       
+
+  LaunchConfig:
+    Type" : "AWS::AutoScaling::LaunchConfiguration",
+    Properties" : {
+      ImageId: 
+	    Fn::FindInMap
+		  - AWSRegionArch2AMI
+		  - Ref "AWS::Region"
+          - Fn::FindInMap:
+		      - "AWSInstanceType2Arch"
+			  - !Ref InstanceType
+			  - "Arch"
+        UserData:
+  		  Fn::Base64: "80"
+        SecurityGroups: !Ref InstanceSecurityGroup
+        InstanceType: !Ref InstanceType
+		
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access on the configured port
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+	    - IpProtocol: tcp
+		  FromPort: "80"
+		  ToPort" : "80"
+		  SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+		
 Outputs:
   VPC:
     Description: VPC
