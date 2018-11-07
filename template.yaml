@@ -287,9 +287,9 @@ Resources:
       SecurityGroups: !Ref WebLoadBalancerSecurityGroup
       Subnets: !Ref PublicSubnet
       Listeners: 
-	  - LoadBalancerPort: "80"
-	    InstancePort: "80"
-	    Protocol: HTTP
+      - LoadBalancerPort: "80"
+        InstancePort: "80"
+        Protocol: HTTP
       HealthCheck:
         Target: HTTP:80/
         HealthyThreshold: '3'
@@ -303,50 +303,50 @@ Resources:
       GroupDescription: Enable HTTP access on port 80
       VpcId: !Ref VPC
       SecurityGroupIngress:
-	  - IpProtocol: tcp
-	    FromPort: '80'
-		ToPort: '80'
-		CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
-	  - IpProtocol: tcp
-	    FromPort: '80'
-		ToPort: '80'
-		CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
 
   WebServerGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       AvailabilityZones:
-	    Fn::GetAtt:
-		  - PrivateSubnet1
-		  - PrivateSubnet2
-		  - AvailabilityZone
+        Fn::GetAtt:
+          - PrivateSubnet1
+          - PrivateSubnet2
+          - AvailabilityZone
       VPCZoneIdentifier: 
-	    - !Ref PrivateSubnet1
-	    - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
       LaunchConfigurationName: !Ref WebTierLaunchConfig
       MinSize: "2"
       MaxSize: "10"
       DesiredCapacity: !Ref InstanceCount
       LoadBalancerNames: !Ref PublicElasticLoadBalancer
       Tags:
-	    Key: Network
-		Value: Public
-		PropagateAtLaunch: true		
+        Key: Network
+        Value: Public
+        PropagateAtLaunch: true		
 
   WebTierLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId: 
-	    Fn::FindInMap
-		  - AWSRegionArch2AMI
-		  - !Ref "AWS::Region"
+        Fn::FindInMap
+          - AWSRegionArch2AMI
+          - !Ref "AWS::Region"
           - Fn::FindInMap:
-		      - "AWSInstanceType2Arch"
-			  - !Ref InstanceType
-			  - "Arch"
+              - "AWSInstanceType2Arch"
+              - !Ref InstanceType
+              - "Arch"
         UserData:
-  		  Fn::Base64: "80"
+          Fn::Base64: "80"
         SecurityGroups: !Ref WebInstanceSecurityGroup
         InstanceType: !Ref InstanceType
 		
@@ -356,10 +356,10 @@ Resources:
       GroupDescription: Enable HTTP access on the configured port
       VpcId: !Ref VPC
       SecurityGroupIngress:
-	    - IpProtocol: tcp
-		  FromPort: "80"
-		  ToPort" : "80"
-		  SourceSecurityGroupId: !Ref WebLoadBalancerSecurityGroup
+        - IpProtocol: tcp
+          FromPort: "80"
+          ToPort" : "80"
+          SourceSecurityGroupId: !Ref WebLoadBalancerSecurityGroup
 		
 Outputs:
   VPC:
@@ -375,3 +375,4 @@ Outputs:
     Value: !GetAtt 
       - PublicSubnet2
       - AvailabilityZone
+      
