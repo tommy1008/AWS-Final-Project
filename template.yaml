@@ -176,7 +176,7 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.4.0/24
       AvailabilityZone: !Select 
-        - '1'
+        - '0'
         - !GetAZs ''
       Tags:
         - Key: Name
@@ -188,7 +188,7 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.5.0/24
       AvailabilityZone: !Select 
-        - '0'
+        - '1'
         - !GetAZs ''
       Tags:
         - Key: Name
@@ -200,7 +200,7 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.6.0/24
       AvailabilityZone: !Select 
-        - '1'
+        - '0'
         - !GetAZs ''
       Tags:
         - Key: Name
@@ -280,8 +280,58 @@ Resources:
         - !Ref PrivateSubnet5
         - !Ref PrivateSubnet6
       NetworkAclId: !Ref PublicNetworkAcl
-        
-   
+         
+  ElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      SecurityGroups: !Ref LoadBalancerSecurityGroup
+      Subnets: !Ref PublicSubnet
+      Listeners: 
+	    LoadBalancerPort: "80"
+	    InstancePort: "80"
+	    Protocol: HTTP
+      HealthCheck:
+        Target: HTTP:80/
+        HealthyThreshold: '3'
+        UnhealthyThreshold: '5'
+        Interval: '90'
+        Timeout: '60'
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access on port 80
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+	  - IpProtocol: tcp
+	    FromPort: 80
+		ToPort: 80
+		CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+	  - IpProtocol: tcp
+	    FromPort: 80
+		ToPort: 80
+		CidrIp: 0.0.0.0/0
+
+  WebServerGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones:
+	    Fn::GetAtt:
+		  - PrivateSubnet
+		  - AvailabilityZone
+      VPCZoneIdentifier: 
+	    - !Ref PrivateSubnet1
+	    - !Ref PrivateSubnet2
+      LaunchConfigurationName !Ref LaunchConfig
+      MinSize: "2"
+      MaxSize: "10"
+      DesiredCapacity: !Ref InstanceCount
+      LoadBalancerNames: !Ref ElasticLoadBalancer
+      Tags:
+	    Key: Network
+		Value: Public
+		PropagateAtLaunch: true		
        
 Outputs:
   VPC:
