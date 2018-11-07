@@ -287,7 +287,7 @@ Resources:
       SecurityGroups: !Ref WebLoadBalancerSecurityGroup
       Subnets: !Ref PublicSubnet
       Listeners: 
-	    LoadBalancerPort: "80"
+	  - LoadBalancerPort: "80"
 	    InstancePort: "80"
 	    Protocol: HTTP
       HealthCheck:
@@ -304,13 +304,13 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
 	  - IpProtocol: tcp
-	    FromPort: 80
-		ToPort: 80
+	    FromPort: '80'
+		ToPort: '80'
 		CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
 	  - IpProtocol: tcp
-	    FromPort: 80
-		ToPort: 80
+	    FromPort: '80'
+		ToPort: '80'
 		CidrIp: 0.0.0.0/0
 
   WebServerGroup:
@@ -324,7 +324,7 @@ Resources:
       VPCZoneIdentifier: 
 	    - !Ref PrivateSubnet1
 	    - !Ref PrivateSubnet2
-      LaunchConfigurationName !Ref WebTierLaunchConfig
+      LaunchConfigurationName: !Ref WebTierLaunchConfig
       MinSize: "2"
       MaxSize: "10"
       DesiredCapacity: !Ref InstanceCount
@@ -335,12 +335,12 @@ Resources:
 		PropagateAtLaunch: true		
 
   WebTierLaunchConfig:
-    Type" : "AWS::AutoScaling::LaunchConfiguration",
-    Properties" : {
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
       ImageId: 
 	    Fn::FindInMap
 		  - AWSRegionArch2AMI
-		  - Ref "AWS::Region"
+		  - !Ref "AWS::Region"
           - Fn::FindInMap:
 		      - "AWSInstanceType2Arch"
 			  - !Ref InstanceType
