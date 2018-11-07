@@ -349,7 +349,7 @@ Resources:
           Fn::Base64: "80"
         SecurityGroups: !Ref WebInstanceSecurityGroup
         InstanceType: !Ref InstanceType
-		
+
   WebInstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -360,7 +360,7 @@ Resources:
           FromPort: "80"
           ToPort" : "80"
           SourceSecurityGroupId: !Ref WebLoadBalancerSecurityGroup
-		
+
 Outputs:
   VPC:
     Description: VPC
