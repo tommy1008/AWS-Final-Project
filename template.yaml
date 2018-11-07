@@ -281,10 +281,10 @@ Resources:
         - !Ref PrivateSubnet6
       NetworkAclId: !Ref PublicNetworkAcl
          
-  ElasticLoadBalancer:
+  PublicElasticLoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
-      SecurityGroups: !Ref LoadBalancerSecurityGroup
+      SecurityGroups: !Ref WebLoadBalancerSecurityGroup
       Subnets: !Ref PublicSubnet
       Listeners: 
 	    LoadBalancerPort: "80"
@@ -297,7 +297,7 @@ Resources:
         Interval: '90'
         Timeout: '60'
 
-  LoadBalancerSecurityGroup:
+  WebLoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Enable HTTP access on port 80
@@ -324,17 +324,17 @@ Resources:
       VPCZoneIdentifier: 
 	    - !Ref PrivateSubnet1
 	    - !Ref PrivateSubnet2
-      LaunchConfigurationName !Ref LaunchConfig
+      LaunchConfigurationName !Ref WebTierLaunchConfig
       MinSize: "2"
       MaxSize: "10"
       DesiredCapacity: !Ref InstanceCount
-      LoadBalancerNames: !Ref ElasticLoadBalancer
+      LoadBalancerNames: !Ref PublicElasticLoadBalancer
       Tags:
 	    Key: Network
 		Value: Public
 		PropagateAtLaunch: true		
 
-  LaunchConfig:
+  WebTierLaunchConfig:
     Type" : "AWS::AutoScaling::LaunchConfiguration",
     Properties" : {
       ImageId: 
@@ -347,10 +347,10 @@ Resources:
 			  - "Arch"
         UserData:
   		  Fn::Base64: "80"
-        SecurityGroups: !Ref InstanceSecurityGroup
+        SecurityGroups: !Ref WebInstanceSecurityGroup
         InstanceType: !Ref InstanceType
 		
-  InstanceSecurityGroup:
+  WebInstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Enable HTTP access on the configured port
@@ -359,7 +359,7 @@ Resources:
 	    - IpProtocol: tcp
 		  FromPort: "80"
 		  ToPort" : "80"
-		  SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+		  SourceSecurityGroupId: !Ref WebLoadBalancerSecurityGroup
 		
 Outputs:
   VPC:
@@ -375,4 +375,3 @@ Outputs:
     Value: !GetAtt 
       - PublicSubnet2
       - AvailabilityZone
-      
