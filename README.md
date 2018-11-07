@@ -7,14 +7,12 @@ cd AWS-Final-Project/
 chmod +x *.sh  
 ./setup.sh  
 
-
 after that you may need to run  
 source venv/bin/activate  
 
-then set the config
-. ./set_config.sh
+then use the (. ./set_config.sh) command to set the config,
 not forget the first "."
 
 after that you can run
-./deployment.sh
+(./deployment.sh)
 to deployment the final project
