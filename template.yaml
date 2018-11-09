@@ -2,13 +2,17 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy final project
 
 Parameters:
-  InstanceType:
+  WebInstanceType:
     Type: String
     Default: t2.large
-    Description: Default is t2.large.
+    Description: Default Web Tier is t2.large.
+  AppInstanceType:
+    Type: String
+    Default: r3.2xlarge
+    Description: Default Application Tier is r3.2xlarge.
   InstanceCount:
     Type: Number
-    Default: 2
+    Default: 6
     Description: Number of EC2 instances to launch
 
 Mappings:
@@ -297,7 +301,9 @@ Resources:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
       SecurityGroups: !Ref WebLoadBalancerSecurityGroup
-      Subnets: !Ref PublicSubnet
+      Subnets: 
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
       Listeners: 
       - LoadBalancerPort: "80"
         InstancePort: "80"
@@ -337,8 +343,8 @@ Resources:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
       LaunchConfigurationName: !Ref WebTierLaunchConfig
-      MinSize: "2"
-      MaxSize: "10"
+      MinSize: "6"
+      MaxSize: "12"
       DesiredCapacity: !Ref InstanceCount
       LoadBalancerNames: !Ref PublicElasticLoadBalancer
       Tags:
@@ -355,12 +361,12 @@ Resources:
           - !Ref "AWS::Region"
           - Fn::FindInMap:
               - "AWSInstanceType2Arch"
-              - !Ref InstanceType
+              - !Ref WebInstanceType
               - "Arch"
         UserData:
           Fn::Base64: "80"
         SecurityGroups: !Ref WebInstanceSecurityGroup
-        InstanceType: !Ref InstanceType
+        InstanceType: !Ref WebInstanceType
 
   WebInstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -372,6 +378,88 @@ Resources:
           FromPort: "80"
           ToPort" : "80"
           SourceSecurityGroupId: !Ref WebLoadBalancerSecurityGroup
+          
+  PrivateElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      SecurityGroups: !Ref AppLoadBalancerSecurityGroup
+      Subnets: 
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      Listeners: 
+      - LoadBalancerPort: "80"
+        InstancePort: "80"
+        Protocol: HTTP
+      HealthCheck:
+        Target: HTTP:80/
+        HealthyThreshold: '3'
+        UnhealthyThreshold: '5'
+        Interval: '90'
+        Timeout: '60'         
+        
+  AppLoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access on port 80
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+
+  AppServerGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones:
+        Fn::GetAtt:
+          - PrivateSubnet3
+          - PrivateSubnet4
+          - AvailabilityZone
+      VPCZoneIdentifier: 
+        - !Ref PrivateSubnet3
+        - !Ref PrivateSubnet4
+      LaunchConfigurationName: !Ref AppTierLaunchConfig
+      MinSize: "6"
+      MaxSize: "12"
+      DesiredCapacity: !Ref InstanceCount
+      LoadBalancerNames: !Ref PublicElasticLoadBalancer
+      Tags:
+        Key: Network
+        Value: Public
+        PropagateAtLaunch: true		
+
+  AppTierLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: 
+        Fn::FindInMap
+          - AWSRegionArch2AMI
+          - !Ref "AWS::Region"
+          - Fn::FindInMap:
+              - "AWSInstanceType2Arch"
+              - !Ref AppInstanceType
+              - "Arch"
+        UserData:
+          Fn::Base64: "80"
+        SecurityGroups: !Ref AppInstanceSecurityGroup
+        InstanceType: !Ref AppInstanceType
+
+  AppInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP access on the configured port
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "80"
+          ToPort" : "80"
+          SourceSecurityGroupId: !Ref AppLoadBalancerSecurityGroup
 
 Outputs:
   VPC:
@@ -387,4 +475,3 @@ Outputs:
     Value: !GetAtt 
       - PublicSubnet2
       - AvailabilityZone
-      
