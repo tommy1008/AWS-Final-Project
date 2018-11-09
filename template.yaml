@@ -11,6 +11,18 @@ Parameters:
     Default: 2
     Description: Number of EC2 instances to launch
 
+Mappings:
+  AWSInstanceType2Arch:
+    t2.large:
+      Arch: "64"
+    r3.2xlarge:
+      Arch: "64"
+  AWSRegionArch2AMI:
+    us-west-1:
+      "64" : "ami-b18ed2f4"
+    us-east-1:
+      "64" : "ami-81a768e8"
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
