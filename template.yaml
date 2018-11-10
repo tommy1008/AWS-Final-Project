@@ -428,7 +428,7 @@ Resources:
       MinSize: "6"
       MaxSize: "12"
       DesiredCapacity: !Ref InstanceCount
-      LoadBalancerNames: !Ref PublicElasticLoadBalancer
+      LoadBalancerNames: !Ref PrivateElasticLoadBalancer
       Tags:
         Key: Network
         Value: Public
