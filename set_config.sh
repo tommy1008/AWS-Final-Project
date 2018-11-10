@@ -1,2 +1,2 @@
 export STACK_NAME=final_project
-export REGION=us-west-1
+export REGION=us-east-1
