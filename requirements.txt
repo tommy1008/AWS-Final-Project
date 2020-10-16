@@ -22,4 +22,4 @@ requests==2.20.0
 six==1.11.0
 sslyze==2.0.1
 tls-parser==1.2.1
-urllib3==1.22
+urllib3==1.24.2
