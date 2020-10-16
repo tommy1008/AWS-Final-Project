@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy final project
 
-Parameters:
+Parameters: 
   WebInstanceType:
     Type: String
     Default: t2.large
